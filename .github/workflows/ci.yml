@@ -20,8 +20,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          # The unit tests import TypeScript sources directly, which needs
-          # Node's native type stripping.
+          # The build toolchain (tsdown/rolldown) and the unit tests, which
+          # import TypeScript sources directly, both need a modern Node. The
+          # published output does not — that is what the compat job proves.
           node-version: 24
           cache: npm
 
@@ -32,8 +33,17 @@ jobs:
       - run: npm run size
       - run: npm run verify-pack
 
+      # Hand the exact built output to the compat job rather than rebuilding
+      # it there: old Node cannot run the bundler, only the result.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1
+
   compat:
     name: Built output on Node ${{ matrix.node-version }}
+    needs: verify
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -47,8 +57,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: npm
 
-      - run: npm ci
-      - run: npm run build
-      - run: npm run test:compat
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      # No npm install: these tests import only the built output and Node
+      # built-ins, which is exactly what a consumer of the package gets.
+      - run: node --test tests/*.test.mjs
