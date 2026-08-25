@@ -30,11 +30,35 @@ type PackResult = { filename: string; size: number; unpackedSize: number; files:
 // --ignore-scripts keeps the prepack build's output from polluting the JSON;
 // "npm run verify-pack" has already built dist/ by this point.
 const output = execFileSync("npm", ["pack", "--dry-run", "--json", "--ignore-scripts"], { encoding: "utf8" });
-const result = (JSON.parse(output) as PackResult[])[0];
-if (!result) {
-  console.error("npm pack produced no result");
-  process.exit(1);
+
+/**
+ * npm 11 emits an array of results; npm 12 emits an object keyed by package
+ * name. Accept either, and say which shape actually arrived if neither
+ * matches, so the next format change is diagnosable from the log alone.
+ */
+function firstPackResult(raw: string): PackResult {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    console.error(`npm pack did not return JSON. First 200 chars:\n${raw.slice(0, 200)}`);
+    process.exit(1);
+  }
+
+  const candidates = Array.isArray(parsed) ? parsed : typeof parsed === "object" && parsed !== null ? Object.values(parsed) : [];
+  const result = candidates[0] as PackResult | undefined;
+
+  if (!result || !Array.isArray(result.files)) {
+    console.error(
+      `npm pack returned an unrecognised shape (npm ${execFileSync("npm", ["--version"], { encoding: "utf8" }).trim()}): ` +
+        `${Array.isArray(parsed) ? "array" : typeof parsed} with ${candidates.length} entries.`,
+    );
+    process.exit(1);
+  }
+  return result;
 }
+
+const result = firstPackResult(output);
 
 const paths = result.files.map((file) => file.path);
 
