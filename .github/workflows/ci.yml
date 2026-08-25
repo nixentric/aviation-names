@@ -1,7 +1,12 @@
 name: CI
 
-# Runs on every push and pull request, including the automated data PRs, so a
-# reviewer is always looking at a change that already passed the full gate.
+# Runs on every push and on human-opened pull requests.
+#
+# It does NOT run on the automated data PR: GitHub does not trigger workflows
+# for events created with the default GITHUB_TOKEN, which is how
+# create-pull-request opens it. That PR is gated instead inside
+# update-data.yml, which runs build, tests, benchmark, the size check and pack
+# verification BEFORE opening it, and links that run from the PR body.
 on:
   push:
     branches: [main]

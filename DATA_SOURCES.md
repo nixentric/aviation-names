@@ -341,8 +341,14 @@ If nothing changed, the pipeline stops and no pull request is opened.
 | Workflow | Trigger | Does |
 | --- | --- | --- |
 | `.github/workflows/update-data.yml` | daily 03:00 UTC, or manual | fetch → validate → test → benchmark → size check → open PR |
-| `.github/workflows/ci.yml` | push and pull request | typecheck, build, test, size, pack verification on Node 20/22/24 |
+| `.github/workflows/ci.yml` | push, human-opened PRs | typecheck, build, test, size, pack verification; built output re-tested on Node 18/20/22 |
 | `.github/workflows/release.yml` | published GitHub release | full gate, then publish via npm Trusted Publishing (OIDC) |
 
 Upstream changes never publish themselves. A maintainer reviews the data PR,
 merges it, and cuts a release; only then does anything reach npm.
+
+Note that the automated data PR shows no CI checks of its own. GitHub does not
+trigger workflows for pull requests opened with the default `GITHUB_TOKEN`, so
+`update-data.yml` runs the full gate itself — build, tests, benchmark, size
+check, pack verification — before opening the PR, and links that run from the
+PR body. An empty check list there is expected rather than a skipped gate.

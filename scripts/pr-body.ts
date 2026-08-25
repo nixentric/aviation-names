@@ -29,6 +29,11 @@ const delta = before > 0 ? ((after - before) / before) * 100 : 0;
 
 const date = new Date().toISOString().slice(0, 10);
 
+const server = process.env["GITHUB_SERVER_URL"];
+const repo = process.env["GITHUB_REPOSITORY"];
+const runId = process.env["GITHUB_RUN_ID"];
+const runLink = server && repo && runId ? `${server}/${repo}/actions/runs/${runId}` : null;
+
 const sizeRow = (label: string, key: string) => {
   const sizes = current[key];
   return sizes
@@ -67,6 +72,19 @@ const body = [
   "",
   "- [OurAirports](https://ourairports.com/data/) — public domain",
   "- [Wikidata](https://query.wikidata.org/) property P229 — CC0 1.0",
+  "",
+  "## Validation",
+  "",
+  // GitHub does not run workflows for PRs opened with the default GITHUB_TOKEN,
+  // so this PR carries no checks of its own. Point the reviewer at the run that
+  // actually gated it rather than letting an empty check list imply "untested".
+  runLink
+    ? `Build, tests, benchmark, size check and pack verification all passed in [the run that produced this PR](${runLink}) before it was opened.`
+    : "Build, tests, benchmark, size check and pack verification all passed before this PR was opened.",
+  "",
+  "CI does not report checks here: GitHub suppresses workflow triggers for pull",
+  "requests created with the default GITHUB_TOKEN. An empty check list on this PR",
+  "is expected, not a skipped gate.",
   "",
   "Generated automatically. Review the dataset diff before merging; merging does",
   "not publish — a release must be cut separately.",
