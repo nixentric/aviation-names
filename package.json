@@ -19,6 +19,15 @@
     "typescript"
   ],
   "license": "MIT",
+  "author": "nixentric",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nixentric/aviation-names.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nixentric/aviation-names/issues"
+  },
+  "homepage": "https://github.com/nixentric/aviation-names#readme",
   "type": "module",
   "sideEffects": false,
   "engines": {

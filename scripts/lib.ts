@@ -21,7 +21,7 @@ export function fail(message: string): never {
 // fetching
 // ---------------------------------------------------------------------------
 
-const USER_AGENT = "aviation-names-data-pipeline (+https://github.com/aviation-names/aviation-names)";
+const USER_AGENT = "aviation-names-data-pipeline (+https://github.com/nixentric/aviation-names)";
 
 export async function fetchText(
   url: string,
