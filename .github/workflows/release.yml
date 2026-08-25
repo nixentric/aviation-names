@@ -76,4 +76,7 @@ jobs:
         # No NODE_AUTH_TOKEN: the npm CLI detects the OIDC environment and
         # exchanges the id-token for a short-lived publish credential.
         # Provenance is attested automatically.
-        run: npm publish
+        #
+        # --verbose so an auth failure shows whether the OIDC exchange was
+        # attempted and what the registry said, rather than a bare ENEEDAUTH.
+        run: npm publish --verbose
