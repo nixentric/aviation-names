@@ -28,8 +28,18 @@ jobs:
         with:
           # Trusted publishing needs Node >= 22.14.0.
           node-version: 22
-          registry-url: https://registry.npmjs.org
           cache: npm
+          # registry-url is deliberately NOT set, and must not be re-added.
+          #
+          # It makes setup-node write an .npmrc containing
+          #   //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
+          # With no NODE_AUTH_TOKEN secret — the whole point of trusted
+          # publishing — that expands to an empty token, but npm still sees
+          # _authToken as configured, skips the OIDC exchange entirely, and
+          # PUTs unauthenticated. The registry answers 404/permission denied.
+          # Leaving it unset means npm finds no credentials, detects the OIDC
+          # environment, and exchanges the id-token for a short-lived one.
+          # npmjs.org is the default registry, so nothing else is needed.
 
       - name: Ensure npm supports trusted publishing
         run: |
