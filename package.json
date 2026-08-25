@@ -1,6 +1,6 @@
 {
   "name": "aviation-names",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Fast, offline airport and airline name lookup by IATA code. No API, no database, no network requests.",
   "keywords": [
     "aviation",
