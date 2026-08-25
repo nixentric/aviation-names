@@ -1,0 +1,54 @@
+name: CI
+
+# Runs on every push and pull request, including the automated data PRs, so a
+# reviewer is always looking at a change that already passed the full gate.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # The unit tests import TypeScript sources directly, which needs
+          # Node's native type stripping.
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm test
+      - run: npm run size
+      - run: npm run verify-pack
+
+  compat:
+    name: Built output on Node ${{ matrix.node-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Proves the "engines: node >= 18" claim against the real dist output.
+        node-version: [18, 20, 22]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test:compat

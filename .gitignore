@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.log
+*.tsbuildinfo
+*.tgz
+
+# Ephemeral CI state, regenerated on every update run.
+generated/update-summary.json
+
+# graphify knowledge graph (rebuild with /graphify)
+graphify-out/

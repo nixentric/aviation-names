@@ -1,0 +1,91 @@
+name: Update aviation dataset
+
+# Refreshes the generated datasets from upstream and opens a pull request when
+# — and only when — the normalized data actually changed. Nothing here can
+# publish: releasing is a separate, human-triggered workflow.
+on:
+  schedule:
+    # OurAirports regenerates its dump nightly; Wikidata changes continuously.
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Fetch, validate and regenerate
+        id: update
+        run: npm run update-data
+
+      - name: Stop early when the dataset is unchanged
+        if: steps.update.outputs.changed != 'true'
+        run: echo "Upstream matches the committed dataset. Nothing to do."
+
+      # Everything below only runs when real changes landed.
+      - name: Build
+        if: steps.update.outputs.changed == 'true'
+        run: npm run build
+
+      - name: Test
+        if: steps.update.outputs.changed == 'true'
+        run: npm test
+
+      - name: Benchmark
+        if: steps.update.outputs.changed == 'true'
+        run: npm run benchmark
+
+      # Gate first against the committed baseline, then move the baseline forward
+      # inside the PR so a reviewer sees the size delta in the diff.
+      - name: Check size regression
+        if: steps.update.outputs.changed == 'true'
+        run: npm run size
+
+      - name: Verify package contents
+        if: steps.update.outputs.changed == 'true'
+        run: npm run verify-pack
+
+      - name: Compose pull request body
+        if: steps.update.outputs.changed == 'true'
+        id: body
+        run: node scripts/pr-body.ts >> "$GITHUB_OUTPUT"
+
+      - name: Refresh size baseline
+        if: steps.update.outputs.changed == 'true'
+        run: npm run size -- --update
+
+      - name: Open pull request
+        if: steps.update.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: chore/update-dataset
+          base: main
+          commit-message: "chore(data): update aviation dataset ${{ steps.body.outputs.date }}"
+          title: "chore(data): update aviation dataset ${{ steps.body.outputs.date }}"
+          body: ${{ steps.body.outputs.summary }}
+          labels: data
+          delete-branch: true
+          add-paths: |
+            generated/
+            src/airports.data.ts
+            src/airlines.data.ts
+            size-baseline.json

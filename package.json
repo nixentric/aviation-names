@@ -1,0 +1,70 @@
+{
+  "name": "aviation-names",
+  "version": "1.0.0",
+  "description": "Fast, offline airport and airline name lookup by IATA code. No API, no database, no network requests.",
+  "keywords": [
+    "aviation",
+    "airport",
+    "airline",
+    "iata",
+    "iata-code",
+    "airport-code",
+    "airline-code",
+    "airport-names",
+    "airline-names",
+    "flight",
+    "travel",
+    "offline",
+    "lookup",
+    "typescript"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "DATA_SOURCES.md",
+    "LICENSE"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./airport": {
+      "types": "./dist/airport.d.ts",
+      "import": "./dist/airport.js",
+      "require": "./dist/airport.cjs"
+    },
+    "./airline": {
+      "types": "./dist/airline.d.ts",
+      "import": "./dist/airline.js",
+      "require": "./dist/airline.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test tests/*.test.ts tests/*.test.mjs",
+    "benchmark": "node scripts/benchmark.ts",
+    "update-data": "node scripts/update-data.ts",
+    "size": "node scripts/size.ts",
+    "prepack": "npm run build",
+    "verify-pack": "npm run build && node scripts/verify-pack.ts",
+    "test:compat": "node --test tests/*.test.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^26.3.0",
+    "tsdown": "^0.22.14",
+    "typescript": "^5.9.0"
+  }
+}

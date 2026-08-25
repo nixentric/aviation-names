@@ -1,0 +1,69 @@
+name: Release
+
+# Deliberately separate from update-data.yml: an upstream dataset change can
+# never reach the registry on its own. A human merges the data PR, cuts a
+# release, and only then does this run.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: release
+
+    permissions:
+      contents: read
+      # Required for npm Trusted Publishing. No NPM_TOKEN secret exists in this
+      # repository; the registry trusts this workflow's short-lived OIDC token.
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Trusted publishing needs Node >= 22.14.0.
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Ensure npm supports trusted publishing
+        run: |
+          npm install -g npm@latest
+          npm --version
+
+      - run: npm ci
+
+      - name: Verify the tag matches package.json
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version="$(node -p "require('./package.json').version")"
+          if [ "$tag" != "$version" ]; then
+            echo "Release tag $GITHUB_REF_NAME does not match package.json version $version"
+            exit 1
+          fi
+          echo "Publishing version $version"
+
+      - run: npm run typecheck
+
+      - run: npm run build
+
+      - run: npm test
+
+      - run: npm run benchmark
+
+      - name: Check size regression
+        run: npm run size
+
+      - name: Verify package contents
+        run: npm run verify-pack
+
+      - name: Publish to npm
+        # No NODE_AUTH_TOKEN: the npm CLI detects the OIDC environment and
+        # exchanges the id-token for a short-lived publish credential.
+        # Provenance is attested automatically.
+        run: npm publish
