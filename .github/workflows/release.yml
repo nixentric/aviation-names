@@ -1,11 +1,18 @@
 name: Release
 
-# Deliberately separate from update-data.yml: an upstream dataset change can
-# never reach the registry on its own. A human merges the data PR, cuts a
-# release, and only then does this run.
+# The only workflow that publishes. Two ways in, one gate:
+#   - a human cuts a GitHub release, or
+#   - update-data.yml dispatches this at the v* tag it just pushed.
+#
+# The dispatch trigger exists because a release created with GITHUB_TOKEN does
+# not fire `release: published` — workflow_dispatch is the documented exception
+# to that rule. Dispatching at the tag (not a branch) keeps GITHUB_REF_NAME a
+# version tag, which is what the version check below and the `release`
+# environment's `v*` tag policy both expect.
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 permissions:
   contents: read

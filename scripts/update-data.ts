@@ -96,9 +96,9 @@ async function main(): Promise<void> {
   report("Airports", airports);
   report("Airlines", airlines);
 
-  // Sizes of the emitted src/*.data.ts modules. The pull-request body reports
+  // Sizes of the emitted src/*.data.ts modules. The release notes report
   // built-output sizes instead, measured against the same baseline as the
-  // regression gate — see scripts/pr-body.ts.
+  // regression gate — see scripts/release-notes.ts.
   const combined = measure(airports.module + airlines.module);
   console.log("\nGenerated dataset modules");
   console.log("-------------------");
@@ -115,7 +115,7 @@ async function main(): Promise<void> {
   const changed = airports.diff.changed || airlines.diff.changed;
   console.log(`\n${changed ? "Dataset changed." : "No changes. Dataset is already up to date."}`);
 
-  // Consumed by .github/workflows/update-data.yml to decide whether to open a PR.
+  // Consumed by .github/workflows/update-data.yml to decide whether to release.
   const summary = {
     changed,
     airports: {

@@ -1,8 +1,13 @@
 name: Update aviation dataset
 
-# Refreshes the generated datasets from upstream and opens a pull request when
-# — and only when — the normalized data actually changed. Nothing here can
-# publish: releasing is a separate, human-triggered workflow.
+# Refreshes the generated datasets from upstream and, when — and only when —
+# the normalized data actually changed, commits to main, cuts a patch release
+# and hands off to release.yml, which is the only workflow that publishes.
+#
+# No human in the loop. The gate is scripts/validate-data.ts (minimum entry
+# counts, code shape, duplicate and shrink guards) followed by the full build,
+# test, benchmark, size-regression and pack check below. Any failure leaves the
+# last known-good dataset committed and nothing is tagged.
 on:
   schedule:
     # OurAirports regenerates its dump nightly; Wikidata changes continuously.
@@ -21,7 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
+      # Dispatching release.yml at the new tag.
+      actions: write
 
     steps:
       - uses: actions/checkout@v7
@@ -55,7 +61,7 @@ jobs:
         run: npm run benchmark
 
       # Gate first against the committed baseline, then move the baseline forward
-      # inside the PR so a reviewer sees the size delta in the diff.
+      # in the same commit so the next run measures against these numbers.
       - name: Check size regression
         if: steps.update.outputs.changed == 'true'
         run: npm run size
@@ -64,28 +70,42 @@ jobs:
         if: steps.update.outputs.changed == 'true'
         run: npm run verify-pack
 
-      - name: Compose pull request body
+      - name: Compose release notes
         if: steps.update.outputs.changed == 'true'
         id: body
-        run: node scripts/pr-body.ts >> "$GITHUB_OUTPUT"
+        run: node scripts/release-notes.ts >> "$GITHUB_OUTPUT"
 
       - name: Refresh size baseline
         if: steps.update.outputs.changed == 'true'
         run: npm run size -- --update
 
-      - name: Open pull request
+      - name: Commit, tag and release
         if: steps.update.outputs.changed == 'true'
-        uses: peter-evans/create-pull-request@v8
-        with:
-          branch: chore/update-dataset
-          base: main
-          commit-message: "chore(data): update aviation dataset ${{ steps.body.outputs.date }}"
-          title: "chore(data): update aviation dataset ${{ steps.body.outputs.date }}"
-          body: ${{ steps.body.outputs.summary }}
-          labels: data
-          delete-branch: true
-          add-paths: |
-            generated/
-            src/airports.data.ts
-            src/airlines.data.ts
-            size-baseline.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # Via env, not ${{ }} inside run: the notes are upstream-derived text
+          # and must never be pasted into a shell command.
+          DATE: ${{ steps.body.outputs.date }}
+          NOTES: ${{ steps.body.outputs.summary }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add generated/ src/airports.data.ts src/airlines.data.ts size-baseline.json
+          git commit -m "chore(data): update aviation dataset $DATE"
+
+          # Aborts on a dirty tree, which is the failure mode we want: nothing
+          # gets tagged if a build step left something unexpected behind.
+          npm version patch -m "chore(release): %s"
+          tag="v$(node -p "require('./package.json').version")"
+
+          git push --follow-tags origin main
+          printf '%s\n' "$NOTES" | gh release create "$tag" --title "$tag" --notes-file -
+
+          # This release will NOT fire `release: published` — GitHub suppresses
+          # that for anything created with GITHUB_TOKEN. workflow_dispatch is the
+          # documented exception, so publishing is kicked off explicitly, at the
+          # tag rather than a branch. See the comment at the top of release.yml.
+          gh workflow run release.yml --ref "$tag"
+          echo "Dispatched release.yml at $tag"

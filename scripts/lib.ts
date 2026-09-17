@@ -290,8 +290,8 @@ export const ENTRYPOINTS: [string, string][] = [
  * Concatenates an entry's whole chunk graph.
  *
  * Every size figure the project reports comes from here, so the benchmark, the
- * regression gate and the pull-request body cannot drift apart and quote
- * numbers measured against different things.
+ * regression gate and the release notes cannot drift apart and quote numbers
+ * measured against different things.
  */
 export function bundleSourceOf(entry: string): string {
   const seen = new Set<string>();

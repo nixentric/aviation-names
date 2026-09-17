@@ -140,9 +140,10 @@ fleet data, coordinates, timezones, weather, geolocation, or fuzzy search.
 | Licence | Public domain | CC0 1.0 |
 | Refreshed | Daily via CI | Daily via CI |
 
-Dataset updates are proposed by a scheduled GitHub Action, reviewed by a human,
-and only published after a release is cut. See [DATA_SOURCES.md](DATA_SOURCES.md)
-for the full provenance, filtering rules and known limitations.
+Dataset updates are fetched daily by a scheduled GitHub Action and, if the data
+actually changed and every validation and test passes, published automatically
+as a patch release. See [DATA_SOURCES.md](DATA_SOURCES.md) for the full
+provenance, filtering rules and known limitations.
 
 **An IATA airline designator does not imply IATA membership.** `aviation-names`
 does not use IATA membership as an inclusion criterion, and is not affiliated

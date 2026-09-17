@@ -334,21 +334,32 @@ timestamps. The report distinguishes:
     → New Airport Name
 ```
 
-If nothing changed, the pipeline stops and no pull request is opened.
+If nothing changed, the pipeline stops and nothing is committed, tagged or
+released.
 
 ### Automation
 
 | Workflow | Trigger | Does |
 | --- | --- | --- |
-| `.github/workflows/update-data.yml` | daily 03:00 UTC, or manual | fetch → validate → test → benchmark → size check → open PR |
+| `.github/workflows/update-data.yml` | daily 03:00 UTC, or manual | fetch → validate → test → benchmark → size check → commit to `main` → patch version bump + tag → GitHub release → dispatch `release.yml` |
 | `.github/workflows/ci.yml` | push, human-opened PRs | typecheck, build, test, size, pack verification; built output re-tested on Node 18/20/22 |
-| `.github/workflows/release.yml` | published GitHub release | full gate, then publish via npm Trusted Publishing (OIDC) |
+| `.github/workflows/release.yml` | published GitHub release, or dispatched at a `v*` tag | full gate, then publish via npm Trusted Publishing (OIDC) |
 
-Upstream changes never publish themselves. A maintainer reviews the data PR,
-merges it, and cuts a release; only then does anything reach npm.
+An upstream change reaches npm as a patch release with no human in the loop.
+Nothing gates it but code, so the gate is deliberately strict: `validate-data.ts`
+refuses a dataset that is empty, too small, badly shaped, internally duplicated
+or more than 10% smaller than the last one, and the full build, test, benchmark,
+size-regression and pack check all have to pass before anything is tagged. A
+failure anywhere leaves the last known-good dataset committed and untagged.
 
-Note that the automated data PR shows no CI checks of its own. GitHub does not
-trigger workflows for pull requests opened with the default `GITHUB_TOKEN`, so
-`update-data.yml` runs the full gate itself — build, tests, benchmark, size
-check, pack verification — before opening the PR, and links that run from the
-PR body. An empty check list there is expected rather than a skipped gate.
+`release.yml` stays the only workflow that publishes — that single filename is
+what npm's trusted publisher is configured against. It has a `workflow_dispatch`
+trigger because a GitHub release created with the default `GITHUB_TOKEN` does
+not fire `release: published`; `workflow_dispatch` is the documented exception,
+so `update-data.yml` dispatches it explicitly at the tag it just pushed. The tag
+ref matters twice over: it is what `release.yml` checks against `package.json`,
+and the `release` environment only accepts deployments from `v*` tags.
+
+To stop shipping automatically, drop the last step of `update-data.yml`: the
+data still lands on `main` and the release is still cut, but nothing publishes
+until someone dispatches `release.yml` by hand.

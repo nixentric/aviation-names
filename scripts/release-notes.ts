@@ -1,7 +1,7 @@
 import { type Sizes, formatBytes, measureEntrypoints, readJson } from "./lib.ts";
 
 /**
- * Emits GITHUB_OUTPUT lines for the automated data pull request.
+ * Emits GITHUB_OUTPUT lines for the automated data release.
  *
  * Must run BEFORE `npm run size -- --update`, so the committed baseline still
  * holds the previous release's numbers and "before vs after" compares two
@@ -75,19 +75,15 @@ const body = [
   "",
   "## Validation",
   "",
-  // GitHub does not run workflows for PRs opened with the default GITHUB_TOKEN,
-  // so this PR carries no checks of its own. Point the reviewer at the run that
-  // actually gated it rather than letting an empty check list imply "untested".
+  // Nobody reviews this diff before it ships, so the notes have to say exactly
+  // what did gate it and link the run, rather than implying a human signed off.
   runLink
-    ? `Build, tests, benchmark, size check and pack verification all passed in [the run that produced this PR](${runLink}) before it was opened.`
-    : "Build, tests, benchmark, size check and pack verification all passed before this PR was opened.",
+    ? `Build, tests, benchmark, size check and pack verification all passed in [the run that cut this release](${runLink}).`
+    : "Build, tests, benchmark, size check and pack verification all passed before this release was cut.",
   "",
-  "CI does not report checks here: GitHub suppresses workflow triggers for pull",
-  "requests created with the default GITHUB_TOKEN. An empty check list on this PR",
-  "is expected, not a skipped gate.",
-  "",
-  "Generated automatically. Review the dataset diff before merging; merging does",
-  "not publish — a release must be cut separately.",
+  "Released automatically from upstream data. The gate is scripts/validate-data.ts",
+  "plus the full test, benchmark, size and pack suite; the tag is only pushed once",
+  "all of them pass.",
 ].join("\n");
 
 // Multiline values need the heredoc form of the GITHUB_OUTPUT protocol.

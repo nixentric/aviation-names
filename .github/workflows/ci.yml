@@ -1,12 +1,12 @@
 name: CI
 
-# Runs on every push and on human-opened pull requests.
+# Runs on every human push and pull request.
 #
-# It does NOT run on the automated data PR: GitHub does not trigger workflows
-# for events created with the default GITHUB_TOKEN, which is how
-# create-pull-request opens it. That PR is gated instead inside
-# update-data.yml, which runs build, tests, benchmark, the size check and pack
-# verification BEFORE opening it, and links that run from the PR body.
+# It does NOT run on the automated data commit: GitHub does not trigger
+# workflows for pushes made with the default GITHUB_TOKEN. That commit is gated
+# instead inside update-data.yml, which runs build, tests, benchmark, the size
+# check and pack verification BEFORE committing, and links that run from the
+# release notes.
 on:
   push:
     branches: [main]
