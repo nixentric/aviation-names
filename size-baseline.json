@@ -1,8 +1,8 @@
 {
   "airport": {
-    "raw": 245243,
-    "gzip": 93738,
-    "brotli": 80348
+    "raw": 245278,
+    "gzip": 93761,
+    "brotli": 80378
   },
   "airline": {
     "raw": 20635,
@@ -10,8 +10,8 @@
     "brotli": 8653
   },
   "combined": {
-    "raw": 264768,
-    "gzip": 102702,
-    "brotli": 88449
+    "raw": 264803,
+    "gzip": 102725,
+    "brotli": 88444
   }
 }
