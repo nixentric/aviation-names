@@ -1,8 +1,13 @@
 name: Update aviation dataset
 
 # Refreshes the generated datasets from upstream and, when — and only when —
-# the normalized data actually changed, commits to main, cuts a patch release
-# and hands off to release.yml, which is the only workflow that publishes.
+# the normalized data actually changed, commits to main, cuts a release and
+# hands off to release.yml, which is the only workflow that publishes.
+#
+# A scheduled run always cuts a patch, because upstream drift is the normal
+# case. A run dispatched by hand can pick minor or major instead, for the
+# releases that are not drift: a change to the resolution logic that moves many
+# names at once is not what a consumer pinned to ~1.0.x is expecting.
 #
 # No human in the loop. The gate is scripts/validate-data.ts (minimum entry
 # counts, code shape, duplicate and shrink guards) followed by the full build,
@@ -13,6 +18,15 @@ on:
     # OurAirports regenerates its dump nightly; Wikidata changes continuously.
     - cron: "0 3 * * *"
   workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump for this release"
+        type: choice
+        default: patch
+        options:
+          - patch
+          - minor
+          - major
 
 permissions:
   contents: read
@@ -87,6 +101,11 @@ jobs:
           # and must never be pasted into a shell command.
           DATE: ${{ steps.body.outputs.date }}
           NOTES: ${{ steps.body.outputs.summary }}
+          # github.event.inputs, not inputs: the `inputs` context is only
+          # defined for workflow_dispatch, and the nightly release step must not
+          # depend on how an undefined context evaluates. On a schedule this is
+          # empty and falls back to patch.
+          BUMP: ${{ github.event.inputs.bump || 'patch' }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
@@ -97,7 +116,7 @@ jobs:
 
           # Aborts on a dirty tree, which is the failure mode we want: nothing
           # gets tagged if a build step left something unexpected behind.
-          npm version patch -m "chore(release): %s"
+          npm version "$BUMP" -m "chore(release): %s"
           tag="v$(node -p "require('./package.json').version")"
 
           git push --follow-tags origin main

@@ -358,11 +358,15 @@ released.
 
 | Workflow | Trigger | Does |
 | --- | --- | --- |
-| `.github/workflows/update-data.yml` | daily 03:00 UTC, or manual | fetch → validate → test → benchmark → size check → commit to `main` → patch version bump + tag → GitHub release → dispatch `release.yml` |
+| `.github/workflows/update-data.yml` | daily 03:00 UTC, or manual | fetch → validate → test → benchmark → size check → commit to `main` → version bump + tag → GitHub release → dispatch `release.yml` |
 | `.github/workflows/ci.yml` | push, human-opened PRs | typecheck, build, test, size, pack verification; built output re-tested on Node 18/20/22 |
 | `.github/workflows/release.yml` | published GitHub release, or dispatched at a `v*` tag | full gate, then publish via npm Trusted Publishing (OIDC) |
 
 An upstream change reaches npm as a patch release with no human in the loop.
+A run dispatched by hand can choose `minor` or `major` through the workflow's
+`bump` input, which is what a release carrying more than upstream drift needs —
+a change to the resolution logic that moves many names at once, for instance.
+The schedule has no inputs, so it always falls back to `patch`.
 Nothing gates it but code, so the gate is deliberately strict: `validate-data.ts`
 refuses a dataset that is empty, too small, badly shaped, internally duplicated
 or more than 10% smaller than the last one, and the full build, test, benchmark,
