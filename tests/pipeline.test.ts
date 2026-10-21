@@ -191,6 +191,7 @@ describe("applyOverrides()", () => {
     assert.deepEqual(result.dataset, { KM: "KM Malta Airlines" });
     assert.equal(result.updated, 1);
     assert.equal(result.added, 0);
+    assert.deepEqual(result.masking, [["KM", "Air Malta", "KM Malta Airlines"]]);
   });
 
   test("REMOVE: deletes an entry upstream should not carry", () => {
@@ -203,6 +204,7 @@ describe("applyOverrides()", () => {
     const result = applyOverrides({ GA: "Garuda Indonesia" }, { ZZ: { remove: true } });
     assert.deepEqual(result.dataset, { GA: "Garuda Indonesia" });
     assert.equal(result.removed, 0);
+    assert.deepEqual(result.redundant, ["ZZ"]);
   });
 
   test("normalizes override keys and trims names", () => {
@@ -214,6 +216,22 @@ describe("applyOverrides()", () => {
     const result = applyOverrides({ GA: "Garuda Indonesia" }, { GA: { name: "Garuda Indonesia" } });
     assert.equal(result.added, 0);
     assert.equal(result.updated, 0);
+    assert.deepEqual(result.redundant, ["GA"]);
+  });
+
+  test("reports an override still masking upstream after the designator changed hands", () => {
+    // The pinned carrier has folded and upstream now returns whoever holds the
+    // code. The pin still wins — but masking is the only thing that says so.
+    const result = applyOverrides({ IU: "Nusantara Air" }, { IU: { name: "Super Air Jet" } });
+    assert.equal(result.dataset["IU"], "Super Air Jet");
+    assert.deepEqual(result.masking, [["IU", "Nusantara Air", "Super Air Jet"]]);
+    assert.deepEqual(result.redundant, []);
+  });
+
+  test("an override that adds a new code is neither masking nor redundant", () => {
+    const result = applyOverrides({ GA: "Garuda Indonesia" }, { QZ: { name: "Indonesia AirAsia" } });
+    assert.deepEqual(result.masking, []);
+    assert.deepEqual(result.redundant, []);
   });
 
   test("rejects an empty override name", () => {

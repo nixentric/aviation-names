@@ -2,6 +2,7 @@ import { appendFileSync } from "node:fs";
 import {
   type Dataset,
   type Diff,
+  type Masking,
   type Overrides,
   type Sizes,
   DataError,
@@ -22,7 +23,15 @@ const PATHS = {
   airlines: { json: "generated/airlines.json", module: "src/airlines.data.ts", overrides: "sources/airline-overrides.json" },
 };
 
-type Result = { diff: Diff; sizes: Sizes; dataset: Dataset; module: string; overrideCounts: string };
+type Result = {
+  diff: Diff;
+  sizes: Sizes;
+  dataset: Dataset;
+  module: string;
+  overrideCounts: string;
+  masking: Masking;
+  redundant: string[];
+};
 
 async function build(
   kind: "airports" | "airlines",
@@ -57,6 +66,8 @@ async function build(
     module,
     sizes: measure(module),
     overrideCounts: `${applied.added} added, ${applied.updated} updated, ${applied.removed} removed`,
+    masking: applied.masking,
+    redundant: applied.redundant,
   };
 }
 
@@ -71,6 +82,15 @@ function report(label: string, result: Result): void {
   console.log(`Overrides applied: ${result.overrideCounts}`);
 
   const byCode = <T extends [string, ...unknown[]]>(rows: T[]): T[] => [...rows].sort((a, b) => a[0].localeCompare(b[0]));
+
+  // An override is invisible in the counts once it reaches a steady state, so
+  // say what each one is actually doing to this run.
+  for (const [code, upstream, forced] of byCode(result.masking)) {
+    console.log(`  ! ${code} override masks upstream "${upstream}" with "${forced}"`);
+  }
+  for (const code of [...result.redundant].sort()) {
+    console.log(`  = ${code} override no longer changes anything (upstream agrees)`);
+  }
 
   for (const [code, name] of byCode(diff.added).slice(0, 20)) console.log(`  + ${code} -> ${name}`);
   for (const [code, name] of byCode(diff.removed).slice(0, 20)) console.log(`  - ${code} -> ${name}`);

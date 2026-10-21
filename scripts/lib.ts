@@ -136,15 +136,31 @@ export function parseCsv(text: string): Record<string, string>[] {
 // overrides
 // ---------------------------------------------------------------------------
 
-/** Overrides win over upstream unconditionally. */
+/** `[code, what upstream says, what the override forces]`. */
+export type Masking = [string, string, string][];
+
+/**
+ * Overrides win over upstream unconditionally.
+ *
+ * Because they win silently and never expire, two states need reporting or the
+ * layer rots:
+ *
+ * - `redundant` — upstream now agrees, so the override is dead weight.
+ * - `masking` — the override is suppressing a different upstream value. That is
+ *   the whole point on the day it is written, but IATA designators are recycled:
+ *   the carrier may since have folded and the code passed to someone else, and
+ *   nothing else in the pipeline would ever say so.
+ */
 export function applyOverrides(
   base: Dataset,
   overrides: Overrides,
-): { dataset: Dataset; added: number; updated: number; removed: number } {
+): { dataset: Dataset; added: number; updated: number; removed: number; masking: Masking; redundant: string[] } {
   const dataset: Dataset = { ...base };
   let added = 0;
   let updated = 0;
   let removed = 0;
+  const masking: Masking = [];
+  const redundant: string[] = [];
 
   for (const [rawCode, override] of Object.entries(overrides)) {
     const code = rawCode.trim().toUpperCase();
@@ -153,6 +169,8 @@ export function applyOverrides(
       if (code in dataset) {
         delete dataset[code];
         removed++;
+      } else {
+        redundant.push(code);
       }
       continue;
     }
@@ -160,15 +178,19 @@ export function applyOverrides(
     const name = override.name.trim();
     if (name === "") fail(`Override for ${code} has an empty name`);
 
-    if (code in dataset) {
-      if (dataset[code] !== name) updated++;
-    } else {
+    const upstream = dataset[code];
+    if (upstream === undefined) {
       added++;
+    } else if (upstream === name) {
+      redundant.push(code);
+    } else {
+      updated++;
+      masking.push([code, upstream, name]);
     }
     dataset[code] = name;
   }
 
-  return { dataset: sortDataset(dataset), added, updated, removed };
+  return { dataset: sortDataset(dataset), added, updated, removed, masking, redundant };
 }
 
 export function sortDataset(dataset: Dataset): Dataset {

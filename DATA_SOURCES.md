@@ -255,6 +255,19 @@ normalization, before validation.
 `reason` is not read by the pipeline. It is required by convention so the next
 maintainer knows why an override exists and when it can be dropped.
 
+Because an override wins silently and never expires, every run prints what each
+one is actually doing:
+
+```
+  ! IU override masks upstream "Midstate Airlines" with "Super Air Jet"
+  = QZ override no longer changes anything (upstream agrees)
+```
+
+`=` means upstream has caught up and the override is dead weight. `!` names the
+value being suppressed — and since IATA designators are recycled, that line is
+also how a designator quietly changing hands becomes visible: the masked name
+is simply no longer the carrier the override was written for.
+
 ### What overrides are for
 
 - new airlines and airports not yet in upstream
