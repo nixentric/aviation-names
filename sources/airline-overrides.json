@@ -3,6 +3,10 @@
     "name": "Aklak Air",
     "reason": "Defensive pin, not a correction: Aklak Air (Q420162) holds 6L and enwiki confirms it, but Hokkaido Air System (Q1188206) has 19 sitelinks against Aklak's 10 and would win the code once the corrected AIRLINE_TYPES lets it pass the isAirline tiebreak. Hokkaido flies as JL. Drop this once either item records the designator properly."
   },
+  "8B": {
+    "name": "TransNusa",
+    "reason": "TransNusa Air Services (Q3537331) flies as 8B (8B674-8B679 CGK-KUL, 8B5202 TKG-CGK in 2026 schedules), but its Wikidata P229 reads M8, so the only 8B claimant upstream is Business Air (Q1017549, Thailand, defunct). Drop this override once Q3537331 carries P229=8B."
+  },
   "IU": {
     "name": "Super Air Jet",
     "reason": "Wikidata Q107472762 is typed as an airline but carries no P229 claim, so the only IU claimant upstream is Midstate Airlines (dissolved 1989). Drop this override once P229=IU lands on Q107472762."

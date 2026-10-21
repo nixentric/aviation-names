@@ -284,14 +284,15 @@ is simply no longer the carrier the override was written for.
 | --- | --- | --- | --- |
 | Airport | `DPS` | `I Gusti Ngurah Rai International Airport` | OurAirports prefixes the municipality (`Denpasar I Gusti Ngurah Rai…`); passengers and airline systems use the unprefixed name |
 | Airline | `IU` | `Super Air Jet` | Wikidata's Super Air Jet item ([Q107472762](https://www.wikidata.org/wiki/Q107472762)) carries no P229 claim, so the only `IU` claimant upstream is Midstate Airlines, dissolved 1989 |
+| Airline | `8B` | `TransNusa` | TransNusa ([Q3537331](https://www.wikidata.org/wiki/Q3537331)) flies as `8B` in 2026 schedules, but Wikidata records its P229 as `M8`, so the only `8B` claimant upstream is Business Air, defunct |
 | Airline | `6L` | `Aklak Air` | Aklak Air holds `6L`, but Hokkaido Air System outranks it on sitelinks and flies as `JL`; pins the correct holder against the sitelink tiebreak |
 
 Wikidata resolves rebrands reliably (`KM` → KM Malta Airlines, `OD` → Batik
 Air Malaysia), so the airline file stays reserved for what the ranking cannot
 reach: a live carrier whose Wikidata item is missing its designator never
 appears in the query at all, and no amount of tiebreaking will surface it.
-`8B` (Business Air, defunct, over TransNusa) and `RI` (Mandala Airlines, ceased
-2014) are the same shape and are candidates for the same treatment.
+`RI` (Mandala Airlines, ceased 2014) is the same shape and a candidate for the
+same treatment.
 
 ---
 
