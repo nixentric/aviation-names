@@ -5,13 +5,13 @@
     "brotli": 80378
   },
   "airline": {
-    "raw": 20624,
-    "gzip": 9859,
-    "brotli": 8652
+    "raw": 20552,
+    "gzip": 9842,
+    "brotli": 8646
   },
   "combined": {
-    "raw": 264792,
-    "gzip": 102727,
-    "brotli": 88401
+    "raw": 264720,
+    "gzip": 102712,
+    "brotli": 88398
   }
 }
