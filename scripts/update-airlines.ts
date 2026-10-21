@@ -17,12 +17,12 @@ const IATA_AIRLINE_CODE = /^[0-9A-Z]{2}$/;
  */
 const AIRLINE_TYPES = new Set([
   "Q46970", // airline
-  "Q2401749", // regional airline
-  "Q1129936", // cargo airline
-  "Q2401751", // charter airline
-  "Q1141470", // low-cost airline
-  "Q6017969", // flag carrier
-  "Q1145276", // helicopter airline
+  "Q2440569", // regional airline
+  "Q1057026", // cargo airline
+  "Q607958", // charter airline
+  "Q190915", // low-cost airline
+  "Q721639", // flag carrier
+  "Q53649729", // helicopter airline
 ]);
 
 export const SPARQL_QUERY = `
