@@ -271,6 +271,7 @@ maintainer knows why an override exists and when it can be dropped.
 | --- | --- | --- | --- |
 | Airport | `DPS` | `I Gusti Ngurah Rai International Airport` | OurAirports prefixes the municipality (`Denpasar I Gusti Ngurah Rai…`); passengers and airline systems use the unprefixed name |
 | Airline | `IU` | `Super Air Jet` | Wikidata's Super Air Jet item ([Q107472762](https://www.wikidata.org/wiki/Q107472762)) carries no P229 claim, so the only `IU` claimant upstream is Midstate Airlines, dissolved 1989 |
+| Airline | `6L` | `Aklak Air` | Aklak Air holds `6L`, but Hokkaido Air System outranks it on sitelinks and flies as `JL`; pins the correct holder against the sitelink tiebreak |
 
 Wikidata resolves rebrands reliably (`KM` → KM Malta Airlines, `OD` → Batik
 Air Malaysia), so the airline file stays reserved for what the ranking cannot
