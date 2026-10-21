@@ -6,5 +6,13 @@
   "IU": {
     "name": "Super Air Jet",
     "reason": "Wikidata Q107472762 is typed as an airline but carries no P229 claim, so the only IU claimant upstream is Midstate Airlines (dissolved 1989). Drop this override once P229=IU lands on Q107472762."
+  },
+  "RE": {
+    "name": "Stobart Air",
+    "reason": "Aer Arann Islands holds no IATA designator at all (enwiki: `IATA = -`) and won RE only on sitelinks once the corrected AIRLINE_TYPES let it pass the isAirline tiebreak. RE's last real holder was Stobart Air (ICAO STK), ceased 2021-06-12; Aer Arann (Q381078, dissolved 2014) held it before. No live claimant exists, so this pins the most recent one, as the other 146 defunct-holder codes already do."
+  },
+  "ZQ": {
+    "name": "German Airways",
+    "reason": "Air Montenegro flies as 4O (enwiki, ICAO MNE, callsign MOUNT EAGLE), not ZQ, and won on 15 sitelinks. ZQ's documented holders are German Airways (ICAO GER, Wikidata Q164222 'defunct German airline', ceased 2020-04-21) and Locair (ceased 2010). Wikipedia's maintained A-Z code list also gives ZQ to German Airways. No live claimant exists."
   }
 }
