@@ -270,11 +270,14 @@ maintainer knows why an override exists and when it can be dropped.
 | Dataset | Code | Override | Reason |
 | --- | --- | --- | --- |
 | Airport | `DPS` | `I Gusti Ngurah Rai International Airport` | OurAirports prefixes the municipality (`Denpasar I Gusti Ngurah Rai…`); passengers and airline systems use the unprefixed name |
+| Airline | `IU` | `Super Air Jet` | Wikidata's Super Air Jet item ([Q107472762](https://www.wikidata.org/wiki/Q107472762)) carries no P229 claim, so the only `IU` claimant upstream is Midstate Airlines, dissolved 1989 |
 
-The airline override file ships empty. Wikidata resolved every spot-checked
-carrier correctly, including recent rebrands (`KM` → KM Malta Airlines,
-`OD` → Batik Air Malaysia), so adding speculative entries would only create
-maintenance debt.
+Wikidata resolves rebrands reliably (`KM` → KM Malta Airlines, `OD` → Batik
+Air Malaysia), so the airline file stays reserved for what the ranking cannot
+reach: a live carrier whose Wikidata item is missing its designator never
+appears in the query at all, and no amount of tiebreaking will surface it.
+`8B` (Business Air, defunct, over TransNusa) and `RI` (Mandala Airlines, ceased
+2014) are the same shape and are candidates for the same treatment.
 
 ---
 
