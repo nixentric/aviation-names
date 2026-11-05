@@ -286,6 +286,8 @@ is simply no longer the carrier the override was written for.
 | Airline | `IU` | `Super Air Jet` | Wikidata's Super Air Jet item ([Q107472762](https://www.wikidata.org/wiki/Q107472762)) carries no P229 claim, so the only `IU` claimant upstream is Midstate Airlines, dissolved 1989 |
 | Airline | `8B` | `TransNusa` | TransNusa ([Q3537331](https://www.wikidata.org/wiki/Q3537331)) flies as `8B` in 2026 schedules, but Wikidata records its P229 as `M8`, so the only `8B` claimant upstream is Business Air, defunct |
 | Airline | `6L` | `Aklak Air` | Aklak Air holds `6L`, but Hokkaido Air System outranks it on sitelinks and flies as `JL`; pins the correct holder against the sitelink tiebreak |
+| Airline | `RE` | `Stobart Air` | Aer Arann Islands has no IATA designator (`IATA = -`); `RE`'s last real holder was Stobart Air, ceased 2021-06-12
+| Airline | `ZQ` | `German Airways` | Air Montenegro flies as `4O`; `ZQ`'s documented holders are German Airways (ceased 2020) and Locair (ceased 2010)
 
 Wikidata resolves rebrands reliably (`KM` → KM Malta Airlines, `OD` → Batik
 Air Malaysia), so the airline file stays reserved for what the ranking cannot
